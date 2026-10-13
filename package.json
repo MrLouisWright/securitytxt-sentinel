@@ -1,6 +1,6 @@
 {
   "name": "securitytxt-sentinel",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Validate security.txt (RFC 9116) and robots.txt for your domains or local files: missing or expired Expires, Contact and Canonical problems, wrong location, content type, PGP signature, redirects, plus robots.txt syntax, sitemap and sensitive-path disclosure. CLI, library and GitHub Action. Zero deps.",
   "type": "module",
   "main": "./src/index.js",
