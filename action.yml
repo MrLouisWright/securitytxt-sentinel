@@ -3,7 +3,7 @@ description: 'Validate security.txt (RFC 9116) and robots.txt for domains or fil
 author: 'Louis Wright'
 branding: { icon: 'shield', color: 'green' }
 inputs:
-  targets: { description: 'Domains, URLs or local files (space-separated)', default: '.' }
+  targets: { description: 'Domains, URLs or local files (space-separated)', required: true }
   skip-robots: { description: 'Set to true to skip robots.txt checks', default: 'false' }
   fail-on: { description: 'critical | high | medium | low | info | none', default: 'high' }
   config: { description: 'Path to JSON config file', default: '' }
