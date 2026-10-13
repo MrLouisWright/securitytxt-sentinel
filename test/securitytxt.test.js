@@ -16,7 +16,7 @@ before(async () => {
     if (!r) { res.writeHead(404); return res.end('nope'); }
     res.writeHead(r.status || 200, r.headers || { 'content-type': 'text/plain; charset=utf-8' }); res.end(r.body || '');
   });
-  await new Promise((ok) => srv.listen(0, '127.0.0.1', ok)); base = `http://127.0.0.1:${srv.address().port}`;
+  await new Promise((ok) => srv.listen(0, ok)); base = `http://127.0.0.1:${srv.address().port}`;
 });
 after(() => srv.close());
 
