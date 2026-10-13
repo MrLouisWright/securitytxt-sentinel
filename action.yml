@@ -1,0 +1,51 @@
+name: 'securitytxt-sentinel'
+description: 'Validate security.txt (RFC 9116) and robots.txt for domains or files'
+author: 'Louis Wright'
+branding: { icon: 'shield', color: 'green' }
+inputs:
+  targets: { description: 'Domains, URLs or local files (space-separated)', default: '.' }
+  skip-robots: { description: 'Set to true to skip robots.txt checks', default: 'false' }
+  fail-on: { description: 'critical | high | medium | low | info | none', default: 'high' }
+  config: { description: 'Path to JSON config file', default: '' }
+  sarif: { description: 'Write SARIF to this path', default: '' }
+  json: { description: 'Write JSON report to this path', default: '' }
+  job-summary: { description: 'Write the Markdown report to the job summary (true/false)', default: 'true' }
+  args: { description: 'Extra CLI arguments', default: '' }
+outputs:
+  markdown-file: { description: 'Path of the Markdown report', value: '${{ steps.run.outputs.markdown-file }}' }
+  exit-code: { description: 'Exit code of the scan (0 pass, 1 findings, 2 error)', value: '${{ steps.run.outputs.exit-code }}' }
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      with: { node-version: '20' }
+    - id: run
+      shell: bash
+      env:
+        STS_TARGETS: ${{ inputs.targets }}
+        STS_SKIP_ROBOTS: ${{ inputs.skip-robots }}
+        STS_FAIL_ON: ${{ inputs.fail-on }}
+        STS_CONFIG: ${{ inputs.config }}
+        STS_SARIF: ${{ inputs.sarif }}
+        STS_JSON: ${{ inputs.json }}
+        STS_JOB_SUMMARY: ${{ inputs.job-summary }}
+        STS_ARGS: ${{ inputs.args }}
+        STS_BIN: ${{ github.action_path }}/bin/securitytxt-sentinel.js
+      run: |
+        md="$RUNNER_TEMP/securitytxt-sentinel.md"
+        # shellcheck disable=SC2206
+        targets=($STS_TARGETS)
+        args=("${targets[@]}" --fail-on "$STS_FAIL_ON" --markdown "$md")
+        [ "$STS_SKIP_ROBOTS" = "true" ] && args+=(--no-robots)
+        [ -n "$STS_CONFIG" ] && args+=(--config "$STS_CONFIG")
+        [ -n "$STS_SARIF" ] && args+=(--sarif "$STS_SARIF")
+        [ -n "$STS_JSON" ] && args+=(--json "$STS_JSON")
+        set +e
+        # shellcheck disable=SC2086
+        node "$STS_BIN" "${args[@]}" $STS_ARGS
+        code=$?
+        set -e
+        echo "markdown-file=$md" >> "$GITHUB_OUTPUT"
+        echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+        if [ "$STS_JOB_SUMMARY" = "true" ] && [ -f "$md" ]; then cat "$md" >> "$GITHUB_STEP_SUMMARY"; fi
+        exit $code

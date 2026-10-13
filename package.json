@@ -1,0 +1,57 @@
+{
+  "name": "securitytxt-sentinel",
+  "version": "0.0.0",
+  "description": "Validate security.txt (RFC 9116) and robots.txt for your domains or local files: missing or expired Expires, Contact and Canonical problems, wrong location, content type, PGP signature, redirects, plus robots.txt syntax, sitemap and sensitive-path disclosure. CLI, library and GitHub Action. Zero deps.",
+  "type": "module",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "default": "./src/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "securitytxt-sentinel": "bin/securitytxt-sentinel.js"
+  },
+  "files": [
+    "src",
+    "bin",
+    "action.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "security.txt",
+    "securitytxt",
+    "rfc9116",
+    "robots.txt",
+    "vulnerability-disclosure",
+    "vdp",
+    "bug-bounty",
+    "security",
+    "web-security",
+    "linter",
+    "sarif",
+    "cli",
+    "github-action"
+  ],
+  "author": "Louis Wright <hello@louiswright.co.uk> (https://github.com/MrLouisWright)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrLouisWright/securitytxt-sentinel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MrLouisWright/securitytxt-sentinel/issues"
+  },
+  "homepage": "https://github.com/MrLouisWright/securitytxt-sentinel#readme"
+}

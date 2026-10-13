@@ -1,0 +1,8 @@
+# Our security policy
+Contact: mailto:security@example.com
+Contact: https://example.com/security/report
+Expires: 2027-06-30T23:59:59Z
+Encryption: https://example.com/pgp-key.txt
+Preferred-Languages: en, fr
+Canonical: https://example.com/.well-known/security.txt
+Policy: https://example.com/security/policy

@@ -1,0 +1,9 @@
+Disallow: /early
+User-agent: *
+Disallow: /admin/
+Disallow: /backup/
+Disallow: /search
+Allow: /
+Crawl-delay: 5
+Sitemap: http://example.com/sitemap.xml
+Noindex /foo

@@ -1,0 +1,7 @@
+Contact: security@example.com
+Contact: http://example.com/report
+Expires: 2025-01-01T00:00:00Z
+Expires: 31/12/2027
+Preferred-Languages: en, english!
+Bounty: yes
+this line is wrong
