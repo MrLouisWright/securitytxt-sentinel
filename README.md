@@ -1,5 +1,7 @@
 # securitytxt-sentinel
 
+[![npm version](https://img.shields.io/npm/v/securitytxt-sentinel.svg)](https://www.npmjs.com/package/securitytxt-sentinel) [![CI](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml) [![Node](https://img.shields.io/node/v/securitytxt-sentinel.svg)](https://nodejs.org) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 > Validate security.txt (RFC 9116) and robots.txt for your domains, or as local files in CI before you deploy them.
 
 `securitytxt-sentinel` fetches `/.well-known/security.txt` (falling back to the legacy `/security.txt`) and `/robots.txt` for each domain and checks them against RFC 9116 and common robots.txt mistakes. It catches the classic failure: a security.txt whose `Expires` passed months ago, so researchers are told to ignore it. Local files can be linted too, so a broken security.txt never ships. CLI, library and GitHub Action. Node.js 18+, **zero runtime dependencies**.
