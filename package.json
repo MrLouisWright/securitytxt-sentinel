@@ -2,33 +2,6 @@
   "name": "securitytxt-sentinel",
   "version": "1.0.0",
   "description": "Validate security.txt (RFC 9116) and robots.txt for your domains or local files: missing or expired Expires, Contact and Canonical problems, wrong location, content type, PGP signature, redirects, plus robots.txt syntax, sitemap and sensitive-path disclosure. CLI, library and GitHub Action. Zero deps.",
-  "type": "module",
-  "main": "./src/index.js",
-  "types": "./src/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./src/index.d.ts",
-      "default": "./src/index.js"
-    },
-    "./package.json": "./package.json"
-  },
-  "bin": {
-    "securitytxt-sentinel": "bin/securitytxt-sentinel.js"
-  },
-  "files": [
-    "src",
-    "bin",
-    "action.yml",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
-  ],
-  "engines": {
-    "node": ">=18"
-  },
-  "scripts": {
-    "test": "node --test test/*.test.js"
-  },
   "keywords": [
     "security.txt",
     "securitytxt",
@@ -57,5 +30,50 @@
   "bugs": {
     "url": "https://github.com/MrLouisWright/securitytxt-sentinel/issues"
   },
-  "homepage": "https://mrlouiswright.github.io/securitytxt-sentinel/"
+  "homepage": "https://mrlouiswright.github.io/securitytxt-sentinel/",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./src/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./src/index.js"
+      },
+      "require": {
+        "types": "./dist/types/index.d.ts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "securitytxt-sentinel": "bin/securitytxt-sentinel.js"
+  },
+  "files": [
+    "src",
+    "dist",
+    "bin",
+    "action.yml",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "build": "node scripts/build.mjs",
+    "prepack": "npm run build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "esbuild": "^0.25.12",
+    "typescript": "^5.9.3"
+  }
 }

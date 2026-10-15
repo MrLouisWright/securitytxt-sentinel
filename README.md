@@ -1,6 +1,6 @@
 # securitytxt-sentinel
 
-[![npm version](https://img.shields.io/npm/v/securitytxt-sentinel.svg)](https://www.npmjs.com/package/securitytxt-sentinel) [![CI](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml) [![Node](https://img.shields.io/node/v/securitytxt-sentinel.svg)](https://nodejs.org) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/securitytxt-sentinel.svg)](https://www.npmjs.com/package/securitytxt-sentinel) [![CI](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml/badge.svg)](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml) [![Node](https://img.shields.io/node/v/securitytxt-sentinel.svg)](https://nodejs.org) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE) [![provenance](https://img.shields.io/badge/npm-provenance-blue)](https://docs.npmjs.com/generating-provenance-statements)
 
 > Validate security.txt (RFC 9116) and robots.txt for your domains, or as local files in CI before you deploy them.
 
@@ -134,6 +134,35 @@ Free to use under MIT, no attribution required. If securitytxt-sentinel helps yo
 ```markdown
 [![Built with securitytxt-sentinel by Louis Wright](https://img.shields.io/badge/built%20with-securitytxt--sentinel-blue)](https://louiswright.co.uk)
 ```
+
+## Generate and sign
+
+```sh
+npx securitytxt-sentinel generate --contact security@example.com --expires 365d \
+  --canonical https://example.com/.well-known/security.txt --policy https://example.com/disclosure \
+  --sign --gpg-key security@example.com -o .well-known/security.txt
+```
+
+Contacts without a scheme become `mailto:`. The output is linted before it is written, and `--sign` clear-signs it with your local `gpg`.
+
+## Subdomains
+
+`--subdomains www,api,shop` (or `--subdomains-file subs.txt`) also checks `https://<sub>.<domain>/.well-known/security.txt`, because each host should publish its own file (RFC 9116 section 3).
+
+## Expiry reminder (opt-in)
+
+The Action sets `expires-in-days`, the fewest days left on any checked file. [docs/examples/expiry-reminder.yml](docs/examples/expiry-reminder.yml) runs weekly and opens an issue when fewer than 30 days remain. Nothing happens unless you copy it in.
+
+## Module formats and types
+
+Ships ESM (`import`) and a bundled CommonJS build (`require`), with TypeScript declarations generated from the source:
+
+```js
+import * as lib from 'securitytxt-sentinel';      // ESM
+const lib = require('securitytxt-sentinel');      // CommonJS
+```
+
+Tests live in [`test/`](test) and run on Node 18, 20 and 22 in [GitHub Actions](https://github.com/MrLouisWright/securitytxt-sentinel/actions/workflows/ci.yml), including a require+import check. Releases are published with `npm publish --provenance`.
 
 ## License
 

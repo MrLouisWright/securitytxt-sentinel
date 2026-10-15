@@ -7,6 +7,8 @@ import { parseRobots, lintRobots } from './robots.js';
 import { fetchText } from './fetch.js';
 
 export { parseSecurityTxt, lintSecurityTxt, parseRobots, lintRobots, fetchText, RULES, exceeds, exitCode, formatText, formatJson, formatSarif, formatMarkdown, SEVERITIES, ConfigError };
+import { generateSecurityTxt, signSecurityTxt, resolveExpires } from './generate.js';
+export { generateSecurityTxt, signSecurityTxt, resolveExpires };
 export const VERSION = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version;
 export const TOOL = { name: 'securitytxt-sentinel', version: VERSION, rules: RULES, title: 'securitytxt-sentinel', emoji: '📜', defaultFailOn: 'high' };
 
@@ -41,7 +43,7 @@ async function checkSite(target, o) {
     if (!r.url.startsWith('https://')) raw.push({ rule: 'not-https', location: r.url, message: `security.txt is served from ${r.url}`, fix: 'Serve it over HTTPS only.' });
     const l = lintSecurityTxt(r.body, { url: r.url, contentType: r.contentType, now: o.now, warnDays: o.warnDays });
     raw.push(...l.raw);
-    const ex = l.parsed.fields.find((f) => f.name === 'expires'); if (ex) summary.expires = ex.value;
+    const ex = l.parsed.fields.find((f) => f.name === 'expires'); if (ex) { summary.expires = ex.value; const t = Date.parse(ex.value); if (!Number.isNaN(t)) summary.expiresInDays = Math.floor((t - (o.now ? new Date(o.now) : new Date())) / 864e5); }
     summary.contacts = l.parsed.fields.filter((f) => f.name === 'contact').map((f) => f.value);
     summary.signed = l.parsed.signature.signed;
   }
@@ -59,19 +61,27 @@ async function checkSite(target, o) {
 function checkFile(path, o) {
   const text = readFileSync(path, 'utf8'); const name = basename(path).toLowerCase();
   const kind = o.kind || (name.includes('robots') ? 'robots' : 'security');
-  const raw = kind === 'robots' ? lintRobots(text, { file: path }).raw : lintSecurityTxt(text, { file: path, now: o.now, warnDays: o.warnDays, url: o.canonicalUrl }).raw;
-  return { target: path, summary: { kind: kind === 'robots' ? 'robots.txt' : 'security.txt' }, raw };
+  const l = kind === 'robots' ? lintRobots(text, { file: path }) : lintSecurityTxt(text, { file: path, now: o.now, warnDays: o.warnDays, url: o.canonicalUrl });
+  const summary = { kind: kind === 'robots' ? 'robots.txt' : 'security.txt' };
+  const ex = kind !== 'robots' && l.parsed?.fields?.find((f) => f.name === 'expires');
+  if (ex && !Number.isNaN(Date.parse(ex.value))) { summary.expires = ex.value; summary.expiresInDays = Math.floor((Date.parse(ex.value) - (o.now ? new Date(o.now) : new Date())) / 864e5); }
+  return { target: path, summary, raw: l.raw };
 }
 
 /** Check domains/URLs (fetched) and local files. Options: robots, warnDays, now, timeout, kind, fetch, allow, severity. */
 export async function check(targets, opts = {}) {
+  targets = [...targets];
   validateConfig({ allow: opts.allow, severity: opts.severity });
   const o = { ...opts }; const results = [];
   const isFile = (t) => existsSync(t) && statSync(t).isFile();
+  // each subdomain should publish its own security.txt (RFC 9116 section 3); robots.txt is only checked on the main targets
+  const subs = (opts.subdomains || []).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
+  const subTargets = new Set();
+  if (subs.length) for (const t of [...targets]) { if (isFile(t)) continue; let u; try { u = new URL(toOrigin(t)); } catch { continue; } for (const s of subs) { const h = s.includes('.') && s.endsWith(u.hostname) ? s : `${s}.${u.hostname}`; const st = `${u.protocol}//${h}${u.port ? ':' + u.port : ''}`; if (!targets.includes(st)) { targets = [...targets, st]; subTargets.add(st); } } }
   const queue = [...targets]; const conc = opts.concurrency || 4;
   const out = new Array(queue.length);
   await Promise.all(Array.from({ length: Math.min(conc, queue.length) }, async () => {
-    for (;;) { const i = targets.length - queue.length; const t = queue.shift(); if (t === undefined) return; out[i] = isFile(t) ? checkFile(t, o) : await checkSite(t, o); }
+    for (;;) { const i = targets.length - queue.length; const t = queue.shift(); if (t === undefined) return; out[i] = isFile(t) ? checkFile(t, o) : await checkSite(t, subTargets.has(t) ? { ...o, robots: false, subdomain: true } : o); }
   }));
   results.push(...out);
   return buildReport(TOOL, results, opts);

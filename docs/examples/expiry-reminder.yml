@@ -1,0 +1,22 @@
+# Opt-in: copy to .github/workflows/security-txt-reminder.yml to get an issue when security.txt is about to expire.
+name: security.txt expiry reminder
+on:
+  schedule: [{ cron: '0 8 * * 1' }]
+  workflow_dispatch:
+permissions: { contents: read, issues: write }
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - id: sts
+        uses: MrLouisWright/securitytxt-sentinel@v1
+        with: { targets: 'example.com', skip-robots: 'true', fail-on: 'none' }
+      - if: steps.sts.outputs.expires-in-days != '' && fromJSON(steps.sts.outputs.expires-in-days) < 30
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DAYS: ${{ steps.sts.outputs.expires-in-days }}
+        run: |
+          title="security.txt expires in $DAYS days"
+          if ! gh issue list -R "$GITHUB_REPOSITORY" --state open --search "in:title security.txt expires" --json number -q '.[0].number' | grep -q .; then
+            gh issue create -R "$GITHUB_REPOSITORY" --title "$title" --body "Regenerate it with \`npx securitytxt-sentinel generate --contact ... --expires 365d --sign\` and redeploy."
+          fi
