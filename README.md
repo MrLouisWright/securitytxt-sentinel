@@ -70,6 +70,43 @@ console.log(report.targets[0].summary.expires);
 process.exitCode = exitCode(report, 'high');
 ```
 
+## Options
+
+Full CLI reference (`securitytxt-sentinel --help`):
+
+```text
+securitytxt-sentinel 1.0.1 — validate security.txt (RFC 9116) and robots.txt
+
+Usage: securitytxt-sentinel <domain|url|file> [...] [options]
+
+Domains and URLs are fetched over HTTPS: /.well-known/security.txt (falling back to /security.txt)
+and /robots.txt. Local files are linted directly (names containing "robots" are read as robots.txt).
+
+      --no-robots            Skip robots.txt
+      --kind <k>             Treat local files as "security" or "robots"
+      --canonical <url>      Expected Canonical URL when linting a local security.txt
+      --warn-days <n>        Warn when Expires is closer than this (default 30)
+      --timeout <ms>         Per-request timeout (default 10000)
+      --subdomains <list>    Also check security.txt on these subdomains (e.g. www,api,shop); repeatable
+      --subdomains-file <f>  Subdomains, one per line
+
+Generate
+  securitytxt-sentinel generate --contact <mailto:|https:|email> [--expires 365d|<date>] [--canonical <url>]
+      [--encryption <url>] [--policy <url>] [--acknowledgments <url>] [--hiring <url>] [--csaf <url>]
+      [--preferred-languages en,fr] [--sign [--gpg-key <id>]] [-o <file>]
+  Prints (or writes) a valid RFC 9116 security.txt; --sign clear-signs it with your local gpg key.
+Policy and output
+  -c, --config <file>        JSON config (default .securitytxt-sentinel.json if present)
+  -f, --format <fmt>         text (default) | json | sarif | markdown
+      --json/--sarif/--markdown <file>  Also write that format to a file
+      --fail-on <sev>        critical | high | medium | low | info | none (default high)
+      --list-rules           Print rules and default severities
+      --no-color             Disable colours
+  -v, --version / -h, --help
+
+Exit codes: 0 = passed, 1 = findings at or above --fail-on, 2 = usage error or a target could not be checked.
+```
+
 ## Configuration
 
 Put a `.securitytxt-sentinel.json` in the working directory (or pass `--config <file>`). Every key is optional; CLI flags override the file.
